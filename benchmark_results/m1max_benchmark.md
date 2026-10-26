@@ -12,7 +12,7 @@
 | Metric                        | Apple MLX       |
 |-------------------------------|-----------------|
 | Avg time per epoch            | 0.902s          |
-| Peak active memory            | 25.29 MB        |
+| Active memory (live arrays)   | 25.29 MB        |
 | Loss at epoch 10              | 119.09          |
 | Architecture                  | 784→512→256→z20 |
 | Dataset                       | MNIST (60,000)  |
@@ -23,16 +23,20 @@
 | Metric                  | Apple MLX   | PyTorch MPS | Winner        |
 |-------------------------|-------------|-------------|---------------|
 | Avg time per epoch      | 0.902s      | 3.460s      | MLX ✅ 3.84x faster |
-| Peak active memory      | 25.29 MB    | 64.66 MB    | MLX ✅ 2.56x less   |
-| Loss at epoch 10        | 119.09      | 103.68      | Effectively equal   |
+| Memory reading          | 25.29 MB    | 64.66 MB    | Not comparable†     |
+| Loss at epoch 10        | 119.09      | 103.68      | PyTorch 13% lower   |
 | Metal warmup (epoch 1)  | 1.565s      | 4.849s      | MLX ✅              |
 
 **Architecture:** 784 → 512 → 256 → z(20) → 256 → 512 → 784  
 **Dataset:** MNIST 60,000 samples | Batch size: 128 | Epochs: 10  
 **Optimizer:** Adam lr=1e-3  
 
-> MLX is 3.84x faster per epoch and uses 2.56x less memory than 
-> PyTorch MPS on identical VAE architecture on Apple M1 Max.
+> On identical VAE architecture on Apple M1 Max, the MLX script trains
+> 3.84x faster end to end than the PyTorch MPS script. The data pipelines
+> differ, so part of the gap is data loading, not the framework.
+>
+> † MLX reports `mx.get_active_memory()` (live arrays); PyTorch reports
+> `torch.mps.driver_allocated_memory()` (whole driver pool). Different measures.
 ```
 
 ---
